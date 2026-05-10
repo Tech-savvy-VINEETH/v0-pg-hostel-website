@@ -14,13 +14,13 @@ export function CTASection() {
           Our team is ready to help you find the perfect room.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <Button size="lg" variant="secondary" asChild>
+          <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 shadow-lg" asChild>
             <Link href="/booking" className="flex items-center gap-2">
               <Calendar className="size-5" />
               Book a Room
             </Link>
           </Button>
-          <Button size="lg" variant="outline" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10" asChild>
+          <Button size="lg" variant="outline" className="border-2 border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild>
             <Link href="tel:+919876543210" className="flex items-center gap-2">
               <Phone className="size-5" />
               Call Now: +91 98765 43210

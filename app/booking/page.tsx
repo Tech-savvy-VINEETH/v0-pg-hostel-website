@@ -135,7 +135,7 @@ function BookingContent() {
                   <CardTitle className="font-serif text-xl">Secure Payment</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Checkout roomId={selectedRoom.id} />
+                  <Checkout roomId={selectedRoom.id} roomName={selectedRoom.name} amount={selectedRoom.priceInCents} />
                 </CardContent>
               </Card>
             </div>

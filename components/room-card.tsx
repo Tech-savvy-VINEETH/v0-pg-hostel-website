@@ -17,12 +17,14 @@ const occupancyLabels = {
 
 export function RoomCard({ room }: RoomCardProps) {
   return (
-    <Card className="group overflow-hidden transition-all hover:shadow-xl">
+    <Card className="group overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10 hover:border-primary/40 relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        <div className="absolute inset-0 bg-primary/20 opacity-0 mix-blend-overlay transition-opacity duration-500 group-hover:opacity-100 z-10" />
         <img
           src={room.images[0]}
           alt={room.name}
-          className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />
         <div className="absolute right-3 top-3 flex gap-2">
           {room.available ? (

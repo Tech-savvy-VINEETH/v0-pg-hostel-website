@@ -118,33 +118,56 @@ export default function ContactPage() {
         </section>
 
         {/* Map */}
-        <section className="py-12 md:py-16 bg-secondary/30">
+        <section className="py-12 md:py-16 bg-background relative overflow-hidden">
           <div className="container mx-auto px-4">
-            <h2 className="mb-8 text-center font-serif text-2xl font-bold md:text-3xl">
-              Find Us
-            </h2>
-            <div className="relative aspect-[16/9] max-h-[400px] overflow-hidden rounded-xl bg-primary/5">
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <MapPin className="size-8" />
+            <div className="mb-10 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000 fill-mode-both">
+              <h2 className="font-serif text-3xl font-bold md:text-4xl text-foreground">
+                Find Us
+              </h2>
+              <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
+                Visit us to experience the premium PG lifestyle in person.
+              </p>
+            </div>
+            
+            <div className="group relative w-full h-[450px] overflow-hidden rounded-2xl shadow-xl animate-in fade-in zoom-in-95 duration-1000 fill-mode-both delay-300">
+              {/* Real Google Map iframe embedded as background */}
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3887.896781442111!2d77.5946!3d12.9716!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTLCsDU4JzE3LjgiTiA3N8KwMzUnNDAuNiJF!5e0!3m2!1sen!2sin!4v1625550000000!5m2!1sen!2sin" 
+                className="absolute inset-0 size-full border-0 opacity-70 transition-opacity duration-500 group-hover:opacity-90" 
+                loading="lazy" 
+                style={{ filter: "grayscale(20%) contrast(1.1)" }}
+              />
+              {/* Overlay to catch clicks and style the container */}
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent pointer-events-none" />
+              
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 pointer-events-none">
+                
+                {/* Pulsing Animated Map Marker */}
+                <div className="relative mb-4 flex size-20 items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-primary/40 animate-ping duration-1000" />
+                  <div className="absolute inset-2 rounded-full bg-primary/30 animate-pulse" />
+                  <div className="relative flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/50">
+                    <MapPin className="size-7 animate-bounce" style={{ animationDuration: '2s' }} />
+                  </div>
                 </div>
-                <h3 className="font-serif text-xl font-bold">HomeStay PG</h3>
-                <p className="mt-2 text-muted-foreground">
-                  123 Green Avenue, Near Central Mall,<br />
-                  City Center, Pin - 560001
-                </p>
-                <a
-                  href="https://maps.google.com/?q=12.9716,77.5946"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                >
-                  <MapPin className="size-4" />
-                  Open in Google Maps
-                </a>
+
+                <div className="bg-background/80 backdrop-blur-md px-8 py-5 rounded-xl shadow-lg border border-border/50 pointer-events-auto transition-transform duration-300 hover:scale-105">
+                  <h3 className="font-serif text-xl font-bold text-foreground">HomeStay PG</h3>
+                  <p className="mt-1 text-muted-foreground text-sm leading-relaxed">
+                    123 Green Avenue, Near Central Mall,<br />
+                    City Center, Pin - 560001
+                  </p>
+                  <a
+                    href="https://maps.google.com/?q=12.9716,77.5946"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-md transition-all hover:bg-primary/90 hover:shadow-lg active:scale-95"
+                  >
+                    <MapPin className="size-4" />
+                    Get Directions
+                  </a>
+                </div>
               </div>
-              {/* Decorative grid pattern */}
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:40px_40px] opacity-50" />
             </div>
           </div>
         </section>

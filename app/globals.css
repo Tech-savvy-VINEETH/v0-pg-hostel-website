@@ -121,13 +121,16 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-gold: var(--gold);
   --color-gold-foreground: var(--gold-foreground);
+  
+  /* Vibrant star rating color */
+  --color-star: oklch(0.78 0.16 85);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  html {
+  html[data-scroll-behavior="smooth"] {
     scroll-behavior: smooth;
   }
   body {

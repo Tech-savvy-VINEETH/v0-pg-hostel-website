@@ -16,13 +16,13 @@ export function Hero() {
           {/* Content */}
           <div className="flex flex-col gap-8">
             {/* Premium badge */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
+            <div className="inline-flex items-center gap-3 rounded-full bg-amber-50 px-4 py-2 border border-amber-200/50">
+              <div className="flex items-center gap-0.5">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="size-4 fill-gold text-gold" />
+                  <Star key={i} className="size-4 fill-amber-400 text-amber-400 drop-shadow-sm" />
                 ))}
               </div>
-              <span className="text-sm font-medium tracking-wide text-muted-foreground">
+              <span className="text-sm font-semibold tracking-wide text-amber-800">
                 Premium Accommodation
               </span>
             </div>
@@ -112,14 +112,19 @@ export function Hero() {
               </div>
               
               {/* Floating card */}
-              <div className="absolute -right-6 top-1/3 rounded-xl bg-card p-4 shadow-lg">
+              <div className="absolute -right-6 top-1/3 rounded-xl bg-card p-4 shadow-lg border border-border">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-12 items-center justify-center rounded-full bg-accent/20">
-                    <Star className="size-6 fill-accent text-accent" />
+                  <div className="flex size-12 items-center justify-center rounded-full bg-amber-100">
+                    <Star className="size-6 fill-amber-400 text-amber-400" />
                   </div>
                   <div>
                     <p className="font-serif text-lg font-bold">Excellent</p>
-                    <p className="text-xs text-muted-foreground">Based on 120+ reviews</p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="size-3 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">Based on 120+ reviews</p>
                   </div>
                 </div>
               </div>

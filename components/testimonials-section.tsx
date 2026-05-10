@@ -55,8 +55,15 @@ export function TestimonialsSection() {
                     
                     {/* Rating */}
                     <div className="mb-4 flex items-center gap-1">
-                      {Array.from({ length: testimonial.rating }).map((_, i) => (
-                        <Star key={i} className="size-5 fill-gold text-gold" />
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`size-5 ${
+                            i < testimonial.rating 
+                              ? 'fill-amber-400 text-amber-400' 
+                              : 'fill-muted text-muted'
+                          }`} 
+                        />
                       ))}
                     </div>
                     

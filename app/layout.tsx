@@ -40,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${playfair.variable} ${lato.variable} bg-background`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${playfair.variable} ${lato.variable} bg-background`}>
       <body className="font-sans antialiased">
         {children}
         <Toaster />

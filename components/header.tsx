@@ -2,9 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Menu, Home, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { cn } from '@/lib/utils'
 
 const navItems = [
   { href: '/', label: 'Home' },
@@ -16,6 +18,14 @@ const navItems = [
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname()
+
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/'
+    }
+    return pathname.startsWith(href)
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -31,7 +41,12 @@ export function Header() {
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-primary",
+                isActive(item.href) 
+                  ? "text-primary" 
+                  : "text-muted-foreground"
+              )}
             >
               {item.label}
             </Link>
@@ -70,7 +85,12 @@ export function Header() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="text-lg font-medium text-muted-foreground transition-colors hover:text-primary"
+                    className={cn(
+                      "text-lg font-medium transition-colors hover:text-primary",
+                      isActive(item.href) 
+                        ? "text-primary" 
+                        : "text-muted-foreground"
+                    )}
                     onClick={() => setIsOpen(false)}
                   >
                     {item.label}

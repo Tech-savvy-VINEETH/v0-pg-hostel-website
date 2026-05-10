@@ -52,7 +52,11 @@ export function TestimonialsSection() {
                       </div>
                       <div className="flex items-center gap-1">
                         {Array.from({ length: testimonial.rating }).map((_, i) => (
-                          <Star key={i} className="size-4 fill-primary text-primary" />
+                          <Star 
+                            key={i} 
+                            className="size-4 fill-amber-500 text-amber-500 animate-in fade-in zoom-in duration-500" 
+                            style={{ animationDelay: `${i * 150}ms`, animationFillMode: 'both' }} 
+                          />
                         ))}
                       </div>
                     </div>

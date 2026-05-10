@@ -47,10 +47,12 @@ export function ContactForm() {
           <FieldLabel htmlFor="name">Full Name</FieldLabel>
           <Input
             id="name"
+            type="text"
             placeholder="Your full name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             required
+            autoComplete="name"
           />
         </Field>
 

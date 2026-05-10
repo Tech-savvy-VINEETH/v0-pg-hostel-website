@@ -20,7 +20,7 @@ export function CTASection() {
               Book a Room
             </Link>
           </Button>
-          <Button size="lg" variant="outline" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10" asChild>
+          <Button size="lg" variant="outline" className="bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild>
             <Link href="tel:+919876543210" className="flex items-center gap-2">
               <Phone className="size-5" />
               Call Now: +91 98765 43210

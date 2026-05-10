@@ -15,16 +15,19 @@ interface CheckoutProps {
 }
 
 export function Checkout({ roomId }: CheckoutProps) {
-  const startCheckoutSessionForRoom = useCallback(
-    () => startCheckoutSession(roomId),
-    [roomId],
-  )
+  const fetchClientSecret = useCallback(async () => {
+    const clientSecret = await startCheckoutSession(roomId)
+    if (!clientSecret) {
+      throw new Error('Failed to create checkout session')
+    }
+    return clientSecret
+  }, [roomId])
 
   return (
     <div id="checkout" className="min-h-[500px]">
       <EmbeddedCheckoutProvider
         stripe={stripePromise}
-        options={{ clientSecret: startCheckoutSessionForRoom }}
+        options={{ fetchClientSecret }}
       >
         <EmbeddedCheckout />
       </EmbeddedCheckoutProvider>

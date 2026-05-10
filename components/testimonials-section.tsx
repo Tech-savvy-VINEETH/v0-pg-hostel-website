@@ -2,7 +2,7 @@
 
 import { Star, Quote } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   Carousel,
   CarouselContent,
@@ -41,9 +41,10 @@ export function TestimonialsSection() {
                     <Quote className="mb-4 size-8 text-primary/30" />
                     <p className="mb-6 flex-1 text-muted-foreground">{testimonial.content}</p>
                     <div className="flex items-center gap-4">
-                      <Avatar className="size-12">
-                        <AvatarImage src={testimonial.avatar} alt={testimonial.name} />
-                        <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
+                      <Avatar className="size-12 bg-primary/10 text-primary">
+                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                          {testimonial.initials}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <p className="font-semibold">{testimonial.name}</p>

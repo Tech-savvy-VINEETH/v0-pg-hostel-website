@@ -123,15 +123,28 @@ export default function ContactPage() {
             <h2 className="mb-8 text-center font-serif text-2xl font-bold md:text-3xl">
               Find Us
             </h2>
-            <div className="aspect-[16/9] max-h-[400px] overflow-hidden rounded-xl">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.0!2d77.5946!3d12.9716!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTLCsDU4JzE3LjgiTiA3N8KwMzUnNDAuNiJF!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin"
-                className="size-full border-0"
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="HomeStay PG Location"
-              />
+            <div className="relative aspect-[16/9] max-h-[400px] overflow-hidden rounded-xl bg-primary/5">
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <MapPin className="size-8" />
+                </div>
+                <h3 className="font-serif text-xl font-bold">HomeStay PG</h3>
+                <p className="mt-2 text-muted-foreground">
+                  123 Green Avenue, Near Central Mall,<br />
+                  City Center, Pin - 560001
+                </p>
+                <a
+                  href="https://maps.google.com/?q=12.9716,77.5946"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                  <MapPin className="size-4" />
+                  Open in Google Maps
+                </a>
+              </div>
+              {/* Decorative grid pattern */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:40px_40px] opacity-50" />
             </div>
           </div>
         </section>

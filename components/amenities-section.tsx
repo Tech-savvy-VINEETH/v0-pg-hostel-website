@@ -1,76 +1,101 @@
-import Link from 'next/link'
-import { 
-  Wifi, 
-  Utensils, 
-  Shirt, 
-  Shield, 
-  Sparkles, 
-  Zap, 
-  Droplets, 
-  Car,
-  Sofa,
-  Dumbbell,
-  ArrowRight 
-} from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { ScrollReveal } from '@/components/scroll-reveal'
-import { AMENITIES } from '@/lib/amenities'
+import {
+  Utensils, Shield, Wifi, Sparkles, Zap, Shirt,
+  Coffee, Camera, Lock, BookOpen, Dumbbell, Droplets,
+} from 'lucide-react'
 
-const iconMap: Record<string, React.ReactNode> = {
-  wifi: <Wifi className="size-6" />,
-  utensils: <Utensils className="size-6" />,
-  shirt: <Shirt className="size-6" />,
-  shield: <Shield className="size-6" />,
-  sparkles: <Sparkles className="size-6" />,
-  zap: <Zap className="size-6" />,
-  droplets: <Droplets className="size-6" />,
-  car: <Car className="size-6" />,
-  sofa: <Sofa className="size-6" />,
-  dumbbell: <Dumbbell className="size-6" />,
-}
+const amenityCategories = [
+  {
+    title: 'Essentials',
+    items: [
+      { icon: Zap, label: '24/7 Power Backup', detail: 'Uninterrupted supply with generator backup' },
+      { icon: Droplets, label: 'RO Purified Water', detail: 'Safe drinking water on every floor' },
+      { icon: Sparkles, label: 'Furnished Rooms', detail: 'Bed, wardrobe, study table, and mirror included' },
+    ],
+  },
+  {
+    title: 'Food & Dining',
+    items: [
+      { icon: Utensils, label: '3 Homely Meals Daily', detail: 'Freshly cooked breakfast, lunch, and dinner' },
+      { icon: Coffee, label: 'Tea & Snacks', detail: 'Evening tea with snacks available daily' },
+      { icon: Utensils, label: 'Weekend Specials', detail: 'Regional cuisine and special dishes every weekend' },
+    ],
+  },
+  {
+    title: 'Safety & Security',
+    items: [
+      { icon: Lock, label: 'Biometric Access', detail: 'Fingerprint-controlled entry for residents only' },
+      { icon: Camera, label: 'CCTV Surveillance', detail: 'Round-the-clock monitoring at all entry points' },
+      { icon: Shield, label: 'Security Guards', detail: 'Trained personnel on premises 24/7' },
+    ],
+  },
+  {
+    title: 'Work & Study',
+    items: [
+      { icon: Wifi, label: 'High-Speed Wi-Fi', detail: '100 Mbps fiber internet in every room' },
+      { icon: BookOpen, label: 'Study Lounge', detail: 'Quiet, air-conditioned common study area' },
+      { icon: Zap, label: 'Power Outlets', detail: 'Multiple charging points at every desk' },
+    ],
+  },
+  {
+    title: 'Housekeeping & Maintenance',
+    items: [
+      { icon: Sparkles, label: 'Daily Room Cleaning', detail: 'Professional housekeeping every morning' },
+      { icon: Shirt, label: 'Laundry Service', detail: 'Washing and ironing available on-site' },
+      { icon: Sparkles, label: 'Pest Control', detail: 'Monthly scheduled pest management' },
+    ],
+  },
+  {
+    title: 'Lifestyle & Comfort',
+    items: [
+      { icon: Dumbbell, label: 'Fitness Area', detail: 'Basic gym equipment for daily workouts' },
+      { icon: Coffee, label: 'Common Lounge', detail: 'Spacious area for socializing and relaxation' },
+      { icon: Sparkles, label: 'Terrace Access', detail: 'Open terrace space for fresh air and views' },
+    ],
+  },
+]
 
 export function AmenitiesSection() {
-  const displayAmenities = AMENITIES.slice(0, 6)
-
   return (
-    <section className="bg-background py-16 md:py-24 relative overflow-hidden">
-      <div className="container mx-auto px-4 relative z-10">
-        <ScrollReveal animation="fade-up" className="mb-12 text-center">
-          <p className="text-sm font-medium uppercase tracking-wider text-primary">What We Offer</p>
-          <h2 className="mt-2 font-serif text-3xl font-bold text-foreground md:text-4xl">
-            Modern Amenities for Comfortable Living
+    <section id="amenities" className="bg-white border-y border-border/50 py-24 md:py-32 relative overflow-hidden">
+      <div className="container mx-auto px-4 max-w-7xl relative z-10">
+        <ScrollReveal animation="fade-up" className="mb-16 md:mb-20 text-center">
+          <p className="text-sm font-bold uppercase tracking-widest text-primary mb-3">What&apos;s Included</p>
+          <h2 className="font-serif text-3xl md:text-5xl font-bold text-foreground tracking-tight">
+            Everything You Need, <span className="text-primary italic">Nothing You Don&apos;t</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            We provide everything you need for a comfortable stay, from high-speed internet to homely meals.
+          <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground leading-relaxed">
+            Every amenity is designed around one principle: your daily comfort should never require a second thought.
           </p>
         </ScrollReveal>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {displayAmenities.map((amenity, index) => (
-            <ScrollReveal key={amenity.id} animation="fade-up" delay={index * 100}>
-              <Card className="group overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
-                <CardContent className="flex flex-col items-center p-8 text-center relative z-10">
-                  <div className="mb-5 flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-110 group-hover:shadow-md group-hover:shadow-primary/20">
-                    {iconMap[amenity.icon]}
-                  </div>
-                  <h3 className="mb-2 font-serif text-xl font-semibold text-foreground">{amenity.name}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{amenity.description}</p>
-                </CardContent>
-              </Card>
+        <div className="grid gap-12 md:gap-16 md:grid-cols-2 lg:grid-cols-3">
+          {amenityCategories.map((category, catIndex) => (
+            <ScrollReveal key={category.title} animation="fade-up" delay={catIndex * 80}>
+              <div>
+                <h3 className="font-serif text-xl font-bold text-foreground mb-6 pb-3 border-b-2 border-primary/20">
+                  {category.title}
+                </h3>
+                <ul className="space-y-5">
+                  {category.items.map((item) => {
+                    const Icon = item.icon
+                    return (
+                      <li key={item.label} className="flex items-start gap-3 group">
+                        <div className="flex size-9 items-center justify-center rounded-lg bg-primary/8 text-primary shrink-0 mt-0.5 transition-colors group-hover:bg-primary/15">
+                          <Icon className="size-4.5" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground text-sm">{item.label}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{item.detail}</p>
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
             </ScrollReveal>
           ))}
         </div>
-
-        <ScrollReveal animation="fade-in" delay={400} className="mt-12 text-center">
-          <Button variant="outline" size="lg" className="transition-all hover:scale-105 hover:bg-primary/5 hover:border-primary/50" asChild>
-            <Link href="/amenities" className="flex items-center gap-2">
-              View All Amenities
-              <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </ScrollReveal>
       </div>
     </section>
   )

@@ -14,7 +14,7 @@ import { TESTIMONIALS } from '@/lib/testimonials'
 
 export function TestimonialsSection() {
   return (
-    <section className="bg-background py-16 md:py-24">
+    <section id="reviews" className="bg-background py-24 md:py-32">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
           <p className="text-sm font-medium uppercase tracking-wider text-primary">Testimonials</p>

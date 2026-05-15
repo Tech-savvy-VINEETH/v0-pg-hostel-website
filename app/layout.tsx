@@ -3,6 +3,7 @@ import { Playfair_Display, Outfit } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
+import { MobileStickyCTA } from '@/components/mobile-sticky-cta'
 import './globals.css'
 
 const playfair = Playfair_Display({ 
@@ -47,6 +48,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           {children}
           <Toaster />
+          <MobileStickyCTA />
         </ThemeProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

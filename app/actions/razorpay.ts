@@ -13,7 +13,7 @@ export async function createRazorpayOrder(roomId: string) {
   const options = {
     amount: room.priceInCents, // Razorpay takes amount in paise, same as Stripe's cents
     currency: 'INR',
-    receipt: `receipt_order_${roomId}_${Date.now()}`,
+    receipt: `rcpt_${Date.now().toString().slice(-8)}`,
     notes: {
       roomName: room.name,
       description: `Security deposit for ${room.name}`,

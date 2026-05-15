@@ -1,99 +1,181 @@
+'use client'
+
 import Link from 'next/link'
-import { Home, Phone, Mail, MapPin, Facebook, Instagram, Twitter } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { Home, Phone, Mail, MapPin, Instagram, MessageCircle, Youtube } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 
+const quickLinks = [
+  { href: '#', label: 'Home' },
+  { href: '#rooms', label: 'Rooms & Pricing' },
+  { href: '#amenities', label: 'Amenities' },
+  { href: '#gallery', label: 'Gallery' },
+  { href: '#booking-process', label: 'How It Works' },
+  { href: '#faq', label: 'FAQ' },
+  { href: '#contact', label: 'Contact Us' },
+]
+
+const policies = [
+  { href: '/privacy', label: 'Privacy Policy' },
+  { href: '/terms', label: 'Terms of Service' },
+  { href: '/refund-policy', label: 'Refund Policy' },
+]
+
 export function Footer() {
+  const pathname = usePathname()
+
+  const getHref = (href: string) => {
+    if (pathname !== '/' && href.startsWith('#')) {
+      return `/${href}`
+    }
+    return href
+  }
+
   return (
-    <footer className="border-t border-border bg-secondary/30">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {/* Brand */}
-          <div className="flex flex-col gap-4">
+    <footer className="border-t border-border bg-secondary/20">
+      <div className="container mx-auto px-4 py-14">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+
+          {/* Brand Column */}
+          <div className="flex flex-col gap-5 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2">
-              <Home className="size-6 text-primary" />
+              <div className="flex size-9 items-center justify-center rounded-lg bg-primary">
+                <Home className="size-5 text-primary-foreground" />
+              </div>
               <span className="font-serif text-xl font-bold">HomeStay PG</span>
             </Link>
-            <p className="text-sm text-muted-foreground">
-              Your home away from home. Premium paying guest accommodation for students and working professionals.
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Premium paying guest accommodation for students and working
+              professionals in Hyderabad. Safe, comfortable, and community-first
+              co-living.
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground transition-colors hover:text-primary" aria-label="Facebook">
-                <Facebook className="size-5" />
+            <div className="flex gap-3">
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              >
+                <Instagram className="size-4" />
               </a>
-              <a href="#" className="text-muted-foreground transition-colors hover:text-primary" aria-label="Instagram">
-                <Instagram className="size-5" />
+              <a
+                href="https://wa.me/919876543210"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              >
+                <MessageCircle className="size-4" />
               </a>
-              <a href="#" className="text-muted-foreground transition-colors hover:text-primary" aria-label="Twitter">
-                <Twitter className="size-5" />
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+                className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              >
+                <Youtube className="size-4" />
               </a>
             </div>
           </div>
 
           {/* Quick Links */}
           <div className="flex flex-col gap-4">
-            <h3 className="font-serif text-lg font-semibold">Quick Links</h3>
+            <h3 className="font-serif text-sm font-semibold uppercase tracking-widest text-foreground">
+              Explore
+            </h3>
             <nav className="flex flex-col gap-2">
-              <Link href="/rooms" className="text-sm text-muted-foreground transition-colors hover:text-primary">
-                Our Rooms
-              </Link>
-              <Link href="/amenities" className="text-sm text-muted-foreground transition-colors hover:text-primary">
-                Amenities
-              </Link>
-              <Link href="/gallery" className="text-sm text-muted-foreground transition-colors hover:text-primary">
-                Photo Gallery
-              </Link>
-              <Link href="/booking" className="text-sm text-muted-foreground transition-colors hover:text-primary">
-                Book a Room
-              </Link>
-              <Link href="/contact" className="text-sm text-muted-foreground transition-colors hover:text-primary">
-                Contact Us
-              </Link>
+              {quickLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={getHref(link.href)}
+                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                >
+                  {link.label}
+                </Link>
+              ))}
             </nav>
           </div>
 
-          {/* Contact Info */}
+          {/* Contact */}
           <div className="flex flex-col gap-4">
-            <h3 className="font-serif text-lg font-semibold">Contact Us</h3>
-            <div className="flex flex-col gap-3">
-              <a href="tel:+919876543210" className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary">
-                <Phone className="size-4" />
+            <h3 className="font-serif text-sm font-semibold uppercase tracking-widest text-foreground">
+              Contact
+            </h3>
+            <div className="flex flex-col gap-4 text-sm text-muted-foreground">
+              <a
+                href="tel:+919876543210"
+                className="flex items-center gap-3 transition-colors hover:text-primary"
+              >
+                <Phone className="size-4 shrink-0 text-primary" />
                 +91 98765 43210
               </a>
-              <a href="mailto:info@homestaypg.com" className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary">
-                <Mail className="size-4" />
+              <a
+                href="mailto:info@homestaypg.com"
+                className="flex items-center gap-3 transition-colors hover:text-primary"
+              >
+                <Mail className="size-4 shrink-0 text-primary" />
                 info@homestaypg.com
               </a>
-              <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                <MapPin className="size-4 mt-0.5 shrink-0" />
-                <span>123 Green Avenue, Near Central Mall, City Center - 560001</span>
+              <div className="flex items-start gap-3">
+                <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
+                <span>
+                  123, Green Avenue, Near Central Mall,
+                  <br />
+                  Banjara Hills, Hyderabad — 500034
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Hours */}
+          {/* Office Hours + Mini Map Placeholder */}
           <div className="flex flex-col gap-4">
-            <h3 className="font-serif text-lg font-semibold">Office Hours</h3>
+            <h3 className="font-serif text-sm font-semibold uppercase tracking-widest text-foreground">
+              Office Hours
+            </h3>
             <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-              <p>Monday - Saturday</p>
-              <p className="font-medium text-foreground">9:00 AM - 8:00 PM</p>
-              <p className="mt-2">Sunday</p>
-              <p className="font-medium text-foreground">10:00 AM - 4:00 PM</p>
+              <div className="flex justify-between">
+                <span>Mon – Sat</span>
+                <span className="font-medium text-foreground">9 AM – 8 PM</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Sunday</span>
+                <span className="font-medium text-foreground">10 AM – 4 PM</span>
+              </div>
+              <div className="mt-2 flex justify-between">
+                <span>WhatsApp</span>
+                <span className="font-medium text-foreground">24/7</span>
+              </div>
             </div>
+            <a
+              href="https://maps.google.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
+            >
+              <MapPin className="size-4" />
+              Open in Google Maps
+            </a>
           </div>
         </div>
 
         <Separator className="my-8" />
 
-        <div className="flex flex-col items-center justify-between gap-4 text-center text-sm text-muted-foreground md:flex-row">
-          <p>&copy; {new Date().getFullYear()} HomeStay PG. All rights reserved.</p>
-          <div className="flex gap-4">
-            <Link href="/privacy" className="transition-colors hover:text-primary">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="transition-colors hover:text-primary">
-              Terms of Service
-            </Link>
+        <div className="flex flex-col items-center justify-between gap-4 text-center text-xs text-muted-foreground md:flex-row">
+          <p>© {new Date().getFullYear()} HomeStay PG. All rights reserved.</p>
+          <div className="flex gap-5">
+            {policies.map((p) => (
+              <Link
+                key={p.href}
+                href={p.href}
+                className="transition-colors hover:text-primary"
+              >
+                {p.label}
+              </Link>
+            ))}
           </div>
+          <p>Made with ❤️ in Hyderabad</p>
         </div>
       </div>
     </footer>

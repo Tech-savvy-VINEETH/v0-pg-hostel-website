@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
+import { useAdminStore } from '@/lib/store'
 
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -19,15 +20,39 @@ export function ContactForm() {
     message: '',
   })
 
+  const { addVisitRequest, addBookingRequest } = useAdminStore()
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate form submission
+    // Simulate form submission delay
     await new Promise((resolve) => setTimeout(resolve, 1500))
 
-    toast.success('Message sent successfully!', {
-      description: 'We will get back to you within 24 hours.',
+    if (formData.subject === 'visit') {
+      addVisitRequest({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        visitType: 'in-person',
+        preferredDate: 'TBD',
+        preferredTime: 'TBD',
+        branchPreference: 'Unspecified',
+      })
+    } else {
+      addBookingRequest({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        roomType: 'Unspecified',
+        branchPreference: 'Unspecified',
+        date: new Date().toISOString().split('T')[0],
+        notes: `Subject: ${formData.subject}. Message: ${formData.message}`,
+      })
+    }
+
+    toast.success('Request sent successfully!', {
+      description: 'You can now see this request in the Admin Dashboard.',
     })
 
     setFormData({

@@ -1,0 +1,351 @@
+'use client'
+
+import { useState, useMemo } from 'react'
+import {
+  Search,
+  Users,
+  Phone,
+  Mail,
+  Calendar,
+  IndianRupee,
+  Building2,
+  BedDouble,
+  CheckCircle2,
+  Clock,
+  AlertTriangle,
+  Plus,
+} from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { useAdminStore } from '@/lib/store'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+export default function ResidentsPage() {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [branchFilter, setBranchFilter] = useState('all')
+  const [rentFilter, setRentFilter] = useState('all')
+  const [isAddOpen, setIsAddOpen] = useState(false)
+
+  const { residents, branches, addResident } = useAdminStore()
+
+  const [newResident, setNewResident] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    roomNumber: '',
+    branchId: '',
+    moveInDate: new Date().toISOString().split('T')[0],
+    rentStatus: 'pending' as 'paid' | 'pending' | 'overdue',
+    monthlyRent: 0,
+    securityDeposit: 0,
+    occupation: '',
+  })
+
+  const filteredResidents = useMemo(() => {
+    return residents.filter((resident) => {
+      const matchesSearch =
+        resident.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        resident.phone.includes(searchQuery) ||
+        resident.occupation.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesBranch = branchFilter === 'all' || resident.branchId === branchFilter
+      const matchesRent = rentFilter === 'all' || resident.rentStatus === rentFilter
+      return matchesSearch && matchesBranch && matchesRent
+    })
+  }, [searchQuery, branchFilter, rentFilter, residents])
+
+  const rentStatusColors: Record<string, string> = {
+    paid: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    pending: 'bg-amber-100 text-amber-700 border-amber-200',
+    overdue: 'bg-red-100 text-red-700 border-red-200',
+  }
+
+  const rentStatusIcons: Record<string, typeof CheckCircle2> = {
+    paid: CheckCircle2,
+    pending: Clock,
+    overdue: AlertTriangle,
+  }
+
+  const totalRent = residents.reduce((s, r) => s + r.monthlyRent, 0)
+  const paidCount = residents.filter(r => r.rentStatus === 'paid').length
+  const overdueCount = residents.filter(r => r.rentStatus === 'overdue').length
+
+  const handleAddResident = (e: React.FormEvent) => {
+    e.preventDefault()
+    const selectedBranch = branches.find(b => b.id === newResident.branchId)
+    if (!selectedBranch) return
+
+    addResident({
+      ...newResident,
+      id: `res-${Date.now()}`,
+      branchName: selectedBranch.name.replace('HomeStay PG — ', '')
+    })
+    
+    setIsAddOpen(false)
+    toast.success('Resident added successfully!')
+    setNewResident({
+      name: '', phone: '', email: '', roomNumber: '', branchId: '',
+      moveInDate: new Date().toISOString().split('T')[0], rentStatus: 'pending',
+      monthlyRent: 0, securityDeposit: 0, occupation: ''
+    })
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold font-serif text-foreground tracking-tight">
+            Resident Directory
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Complete directory of all residents across branches
+          </p>
+        </div>
+
+        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2 rounded-xl h-11 font-semibold">
+              <Plus className="size-4" />
+              Add Resident
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <form onSubmit={handleAddResident}>
+              <DialogHeader>
+                <DialogTitle>Add New Resident</DialogTitle>
+                <DialogDescription>
+                  Enter the new resident's details here to onboard them to the system.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto px-2">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input id="name" required value={newResident.name} onChange={e => setNewResident({...newResident, name: e.target.value})} placeholder="e.g. John Doe" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input id="phone" required value={newResident.phone} onChange={e => setNewResident({...newResident, phone: e.target.value})} placeholder="+91..." />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" type="email" required value={newResident.email} onChange={e => setNewResident({...newResident, email: e.target.value})} placeholder="email@..." />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="branch">Branch</Label>
+                    <Select value={newResident.branchId} onValueChange={(v) => setNewResident({...newResident, branchId: v})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Branch" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {branches.filter(b => b.status === 'active').map(b => (
+                          <SelectItem key={b.id} value={b.id}>{b.name.replace('HomeStay PG — ', '')}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="room">Room Number</Label>
+                    <Input id="room" required value={newResident.roomNumber} onChange={e => setNewResident({...newResident, roomNumber: e.target.value})} placeholder="e.g. 101" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="rent">Monthly Rent</Label>
+                    <Input id="rent" type="number" required value={newResident.monthlyRent} onChange={e => setNewResident({...newResident, monthlyRent: parseInt(e.target.value) || 0})} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="occupation">Occupation</Label>
+                    <Input id="occupation" required value={newResident.occupation} onChange={e => setNewResident({...newResident, occupation: e.target.value})} placeholder="Student, Engineer..." />
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={!newResident.branchId}>Save Resident</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid gap-4 sm:grid-cols-4">
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="size-10 rounded-xl bg-blue-50 flex items-center justify-center">
+              <Users className="size-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-xl font-bold">{residents.length}</p>
+              <p className="text-xs text-muted-foreground">Total Residents</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="size-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+              <IndianRupee className="size-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-xl font-bold">₹{(totalRent / 1000).toFixed(0)}K</p>
+              <p className="text-xs text-muted-foreground">Expected Rent / mo</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="size-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+              <CheckCircle2 className="size-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-xl font-bold text-emerald-600">{paidCount}</p>
+              <p className="text-xs text-muted-foreground">Rent Paid</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="size-10 rounded-xl bg-red-50 flex items-center justify-center">
+              <AlertTriangle className="size-5 text-red-600" />
+            </div>
+            <div>
+              <p className="text-xl font-bold text-red-600">{overdueCount}</p>
+              <p className="text-xs text-muted-foreground">Overdue</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by name, phone, or occupation..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 rounded-xl h-11"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <select
+            value={branchFilter}
+            onChange={(e) => setBranchFilter(e.target.value)}
+            className="h-11 rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+          >
+            <option value="all">All Branches</option>
+            {branches.filter(b => b.status === 'active').map(b => (
+              <option key={b.id} value={b.id}>{b.name.replace('HomeStay PG — ', '')}</option>
+            ))}
+          </select>
+          <select
+            value={rentFilter}
+            onChange={(e) => setRentFilter(e.target.value)}
+            className="h-11 rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+          >
+            <option value="all">All Rent Status</option>
+            <option value="paid">Paid</option>
+            <option value="pending">Pending</option>
+            <option value="overdue">Overdue</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Residents Table */}
+      <Card>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border/50 bg-muted/30">
+                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Resident</th>
+                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Contact</th>
+                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Room</th>
+                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Branch</th>
+                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Move-in</th>
+                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Rent</th>
+                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredResidents.map((resident) => {
+                  const StatusIcon = rentStatusIcons[resident.rentStatus]
+                  const initials = resident.name.split(' ').map(n => n[0]).join('').slice(0, 2)
+                  return (
+                    <tr key={resident.id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold shrink-0">
+                            {initials}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-foreground">{resident.name}</p>
+                            <p className="text-xs text-muted-foreground">{resident.occupation}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="flex flex-col gap-1">
+                          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Phone className="size-3" />{resident.phone}
+                          </span>
+                          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Mail className="size-3" />{resident.email}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span className="flex items-center gap-1.5 font-medium text-foreground">
+                          <BedDouble className="size-3.5 text-primary" />
+                          Room {resident.roomNumber}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span className="flex items-center gap-1.5 text-muted-foreground">
+                          <Building2 className="size-3.5" />
+                          {resident.branchName}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span className="flex items-center gap-1.5 text-muted-foreground">
+                          <Calendar className="size-3.5" />
+                          {new Date(resident.moveInDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5 font-semibold text-foreground">₹{resident.monthlyRent.toLocaleString('en-IN')}</td>
+                      <td className="px-4 py-3.5">
+                        <Badge className={cn('gap-1 text-[10px] border', rentStatusColors[resident.rentStatus])}>
+                          <StatusIcon className="size-3" />
+                          {resident.rentStatus.charAt(0).toUpperCase() + resident.rentStatus.slice(1)}
+                        </Badge>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+          {filteredResidents.length === 0 && (
+            <div className="py-16 text-center text-muted-foreground">No residents match your filters.</div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

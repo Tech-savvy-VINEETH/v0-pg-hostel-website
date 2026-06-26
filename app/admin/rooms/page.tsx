@@ -3,7 +3,6 @@
 import { useState, useMemo } from 'react'
 import {
   Search,
-  Filter,
   BedDouble,
   Snowflake,
   Fan,
@@ -14,8 +13,15 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { ADMIN_ROOMS, BRANCHES } from '@/lib/admin-data'
+import { useAdminStore } from '@/lib/store'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export default function RoomsPage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -23,29 +29,36 @@ export default function RoomsPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [typeFilter, setTypeFilter] = useState('all')
 
+  const { rooms, branches, currentUser, updateRoomStatus } = useAdminStore()
+
+  const isManager = currentUser?.role === 'branch_manager'
+  const targetBranchId = currentUser?.branchId
+
+  const activeRooms = useMemo(() => {
+    if (isManager) {
+      return rooms.filter((r) => r.branchId === targetBranchId)
+    }
+    return rooms
+  }, [rooms, isManager, targetBranchId])
+
   const filteredRooms = useMemo(() => {
-    return ADMIN_ROOMS.filter((room) => {
+    return activeRooms.filter((room) => {
       const matchesSearch =
         room.roomNumber.includes(searchQuery) ||
         room.branchName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (room.residentName && room.residentName.toLowerCase().includes(searchQuery.toLowerCase()))
-      const matchesBranch = branchFilter === 'all' || room.branchId === branchFilter
+      
+      const matchesBranch = isManager || branchFilter === 'all' || room.branchId === branchFilter
       const matchesStatus = statusFilter === 'all' || room.status === statusFilter
       const matchesType = typeFilter === 'all' || room.type === typeFilter
       return matchesSearch && matchesBranch && matchesStatus && matchesType
     })
-  }, [searchQuery, branchFilter, statusFilter, typeFilter])
+  }, [activeRooms, searchQuery, branchFilter, statusFilter, typeFilter, isManager])
 
   const statusIcons: Record<string, typeof CheckCircle2> = {
     available: CheckCircle2,
     occupied: User,
     maintenance: Wrench,
-  }
-
-  const statusColors: Record<string, string> = {
-    available: 'bg-emerald-100 text-emerald-700',
-    occupied: 'bg-blue-100 text-blue-700',
-    maintenance: 'bg-amber-100 text-amber-700',
   }
 
   const statusBadgeColors: Record<string, string> = {
@@ -55,9 +68,9 @@ export default function RoomsPage() {
   }
 
   // Summary stats
-  const totalAvailable = ADMIN_ROOMS.filter(r => r.status === 'available').length
-  const totalOccupied = ADMIN_ROOMS.filter(r => r.status === 'occupied').length
-  const totalMaintenance = ADMIN_ROOMS.filter(r => r.status === 'maintenance').length
+  const totalAvailable = activeRooms.filter(r => r.status === 'available').length
+  const totalOccupied = activeRooms.filter(r => r.status === 'occupied').length
+  const totalMaintenance = activeRooms.filter(r => r.status === 'maintenance').length
 
   return (
     <div className="space-y-8">
@@ -67,7 +80,7 @@ export default function RoomsPage() {
           Room Inventory
         </h1>
         <p className="text-muted-foreground mt-1">
-          View and manage rooms across all branches
+          {isManager ? 'View and manage rooms for your assigned branch' : 'View and manage rooms across all branches'}
         </p>
       </div>
 
@@ -79,7 +92,7 @@ export default function RoomsPage() {
               <BedDouble className="size-5 text-foreground" />
             </div>
             <div>
-              <p className="text-xl font-bold">{ADMIN_ROOMS.length}</p>
+              <p className="text-xl font-bold">{activeRooms.length}</p>
               <p className="text-xs text-muted-foreground">Total Rooms</p>
             </div>
           </CardContent>
@@ -131,16 +144,18 @@ export default function RoomsPage() {
           />
         </div>
         <div className="flex flex-wrap gap-2">
-          <select
-            value={branchFilter}
-            onChange={(e) => setBranchFilter(e.target.value)}
-            className="h-11 rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
-          >
-            <option value="all">All Branches</option>
-            {BRANCHES.filter(b => b.status === 'active').map(b => (
-              <option key={b.id} value={b.id}>{b.name.replace('HomeStay PG — ', '')}</option>
-            ))}
-          </select>
+          {!isManager && (
+            <select
+              value={branchFilter}
+              onChange={(e) => setBranchFilter(e.target.value)}
+              className="h-11 rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+            >
+              <option value="all">All Branches</option>
+              {branches.filter(b => b.status === 'active').map(b => (
+                <option key={b.id} value={b.id}>{b.name.replace('HomeStay PG — ', '')}</option>
+              ))}
+            </select>
+          )}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -177,7 +192,7 @@ export default function RoomsPage() {
                   <th className="px-4 py-3 text-left font-semibold text-muted-foreground">AC</th>
                   <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Floor</th>
                   <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Price</th>
-                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Status</th>
+                  <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Status (Click to Edit)</th>
                   <th className="px-4 py-3 text-left font-semibold text-muted-foreground">Resident</th>
                 </tr>
               </thead>
@@ -205,10 +220,36 @@ export default function RoomsPage() {
                       <td className="px-4 py-3.5 text-muted-foreground">Floor {room.floor}</td>
                       <td className="px-4 py-3.5 font-semibold text-foreground">₹{room.pricePerMonth.toLocaleString('en-IN')}</td>
                       <td className="px-4 py-3.5">
-                        <Badge className={cn('gap-1 text-[10px] border', statusBadgeColors[room.status])}>
-                          <StatusIcon className="size-3" />
-                          {room.status.charAt(0).toUpperCase() + room.status.slice(1)}
-                        </Badge>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="outline-none">
+                              <Badge className={cn('gap-1 text-[10px] border cursor-pointer hover:opacity-80 transition-all select-none', statusBadgeColors[room.status])}>
+                                <StatusIcon className="size-3" />
+                                {room.status.charAt(0).toUpperCase() + room.status.slice(1)}
+                              </Badge>
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start" className="bg-background border border-border rounded-xl shadow-lg">
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => {
+                              updateRoomStatus(room.id, 'available')
+                              toast.success(`Room ${room.roomNumber} is now Available`)
+                            }}>
+                              Available
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => {
+                              updateRoomStatus(room.id, 'occupied')
+                              toast.success(`Room ${room.roomNumber} is now Occupied`)
+                            }}>
+                              Occupied
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => {
+                              updateRoomStatus(room.id, 'maintenance')
+                              toast.success(`Room ${room.roomNumber} is under Maintenance`)
+                            }}>
+                              Maintenance
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </td>
                       <td className="px-4 py-3.5 text-muted-foreground">{room.residentName || '—'}</td>
                     </tr>

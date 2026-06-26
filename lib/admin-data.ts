@@ -33,6 +33,7 @@ export interface BookingRequest {
   email: string
   roomType: string
   branchPreference: string
+  branchId?: string
   date: string
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
   notes?: string
@@ -47,6 +48,7 @@ export interface VisitRequest {
   preferredDate: string
   preferredTime: string
   branchPreference: string
+  branchId?: string
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
 }
 
@@ -170,20 +172,20 @@ export const ADMIN_ROOMS: AdminRoom[] = [
 ]
 
 export const BOOKING_REQUESTS: BookingRequest[] = [
-  { id: 'bk-001', name: 'Aditya Sharma', phone: '+91 91234 56001', email: 'aditya@gmail.com', roomType: 'Single AC', branchPreference: 'Madhapur', date: '2026-05-14', status: 'pending', notes: 'Needs parking space' },
-  { id: 'bk-002', name: 'Priyanka Das', phone: '+91 91234 56002', email: 'priyanka@gmail.com', roomType: 'Double Sharing AC', branchPreference: 'Banjara Hills', date: '2026-05-13', status: 'confirmed' },
-  { id: 'bk-003', name: 'Mohammed Ali', phone: '+91 91234 56003', email: 'mali@gmail.com', roomType: 'Single Non-AC', branchPreference: 'Miyapur', date: '2026-05-12', status: 'completed' },
-  { id: 'bk-004', name: 'Kavitha Reddy', phone: '+91 91234 56004', email: 'kavitha@gmail.com', roomType: 'Triple Sharing AC', branchPreference: 'Gachibowli', date: '2026-05-11', status: 'cancelled' },
-  { id: 'bk-005', name: 'Rohit Joshi', phone: '+91 91234 56005', email: 'rohit@gmail.com', roomType: 'Double Sharing Non-AC', branchPreference: 'Madhapur', date: '2026-05-15', status: 'pending' },
-  { id: 'bk-006', name: 'Ananya Patel', phone: '+91 91234 56006', email: 'ananya@gmail.com', roomType: 'Single AC', branchPreference: 'Banjara Hills', date: '2026-05-15', status: 'pending' },
+  { id: 'bk-001', name: 'Aditya Sharma', phone: '+91 91234 56001', email: 'aditya@gmail.com', roomType: 'Single AC', branchPreference: 'Madhapur', branchId: 'mp-001', date: '2026-05-14', status: 'pending', notes: 'Needs parking space' },
+  { id: 'bk-002', name: 'Priyanka Das', phone: '+91 91234 56002', email: 'priyanka@gmail.com', roomType: 'Double Sharing AC', branchPreference: 'Banjara Hills', branchId: 'bh-001', date: '2026-05-13', status: 'confirmed' },
+  { id: 'bk-003', name: 'Mohammed Ali', phone: '+91 91234 56003', email: 'mali@gmail.com', roomType: 'Single Non-AC', branchPreference: 'Miyapur', branchId: 'my-001', date: '2026-05-12', status: 'completed' },
+  { id: 'bk-004', name: 'Kavitha Reddy', phone: '+91 91234 56004', email: 'kavitha@gmail.com', roomType: 'Triple Sharing AC', branchPreference: 'Gachibowli', branchId: 'gb-001', date: '2026-05-11', status: 'cancelled' },
+  { id: 'bk-005', name: 'Rohit Joshi', phone: '+91 91234 56005', email: 'rohit@gmail.com', roomType: 'Double Sharing Non-AC', branchPreference: 'Madhapur', branchId: 'mp-001', date: '2026-05-15', status: 'pending' },
+  { id: 'bk-006', name: 'Ananya Patel', phone: '+91 91234 56006', email: 'ananya@gmail.com', roomType: 'Single AC', branchPreference: 'Banjara Hills', branchId: 'bh-001', date: '2026-05-15', status: 'pending' },
 ]
 
 export const VISIT_REQUESTS: VisitRequest[] = [
-  { id: 'vr-001', name: 'Deepa Kumari', phone: '+91 92345 67001', email: 'deepa@gmail.com', visitType: 'in-person', preferredDate: '2026-05-16', preferredTime: '10:00 AM', branchPreference: 'Banjara Hills', status: 'pending' },
-  { id: 'vr-002', name: 'Sanjay Mishra', phone: '+91 92345 67002', email: 'sanjay@gmail.com', visitType: 'virtual', preferredDate: '2026-05-16', preferredTime: '2:00 PM', branchPreference: 'Madhapur', status: 'confirmed' },
-  { id: 'vr-003', name: 'Fatima Begum', phone: '+91 92345 67003', email: 'fatima@gmail.com', visitType: 'in-person', preferredDate: '2026-05-17', preferredTime: '11:00 AM', branchPreference: 'Gachibowli', status: 'pending' },
-  { id: 'vr-004', name: 'Ravi Teja', phone: '+91 92345 67004', email: 'ravi@gmail.com', visitType: 'in-person', preferredDate: '2026-05-14', preferredTime: '4:00 PM', branchPreference: 'Miyapur', status: 'completed' },
-  { id: 'vr-005', name: 'Nisha Agarwal', phone: '+91 92345 67005', email: 'nisha@gmail.com', visitType: 'virtual', preferredDate: '2026-05-15', preferredTime: '3:00 PM', branchPreference: 'Banjara Hills', status: 'cancelled' },
+  { id: 'vr-001', name: 'Deepa Kumari', phone: '+91 92345 67001', email: 'deepa@gmail.com', visitType: 'in-person', preferredDate: '2026-05-16', preferredTime: '10:00 AM', branchPreference: 'Banjara Hills', branchId: 'bh-001', status: 'pending' },
+  { id: 'vr-002', name: 'Sanjay Mishra', phone: '+91 92345 67002', email: 'sanjay@gmail.com', visitType: 'virtual', preferredDate: '2026-05-16', preferredTime: '2:00 PM', branchPreference: 'Madhapur', branchId: 'mp-001', status: 'confirmed' },
+  { id: 'vr-003', name: 'Fatima Begum', phone: '+91 92345 67003', email: 'fatima@gmail.com', visitType: 'in-person', preferredDate: '2026-05-17', preferredTime: '11:00 AM', branchPreference: 'Gachibowli', branchId: 'gb-001', status: 'pending' },
+  { id: 'vr-004', name: 'Ravi Teja', phone: '+91 92345 67004', email: 'ravi@gmail.com', visitType: 'in-person', preferredDate: '2026-05-14', preferredTime: '4:00 PM', branchPreference: 'Miyapur', branchId: 'my-001', status: 'completed' },
+  { id: 'vr-005', name: 'Nisha Agarwal', phone: '+91 92345 67005', email: 'nisha@gmail.com', visitType: 'virtual', preferredDate: '2026-05-15', preferredTime: '3:00 PM', branchPreference: 'Banjara Hills', branchId: 'bh-001', status: 'cancelled' },
 ]
 
 export const RESIDENTS: Resident[] = [

@@ -20,7 +20,30 @@ import { useAdminStore, useTotalStats } from '@/lib/store'
 
 export default function AdminDashboard() {
   const stats = useTotalStats()
-  const { branches, revenueData, recentActivity } = useAdminStore()
+  const { branches, revenueData, recentActivity, currentUser } = useAdminStore()
+
+  const isManager = currentUser?.role === 'branch_manager'
+  const targetBranchId = currentUser?.branchId
+
+  const filteredBranches = isManager
+    ? branches.filter(b => b.id === targetBranchId)
+    : branches
+
+  const branchName = isManager
+    ? branches.find(b => b.id === targetBranchId)?.name.replace('HomeStay PG — ', '') || ''
+    : ''
+
+  const totalRevenueAllActive = branches.filter(b => b.status === 'active').reduce((sum, b) => sum + b.monthlyRevenue, 0)
+  const managerBranchRevenue = branches.find(b => b.id === targetBranchId)?.monthlyRevenue || 0
+  const revenueFraction = totalRevenueAllActive > 0 ? (managerBranchRevenue / totalRevenueAllActive) : 0
+
+  const filteredRevenueData = isManager
+    ? revenueData.map(d => ({ ...d, revenue: Math.round(d.revenue * revenueFraction) }))
+    : revenueData
+
+  const filteredActivity = isManager
+    ? recentActivity.filter(activity => activity.message.toLowerCase().includes(branchName.toLowerCase()))
+    : recentActivity
 
   const kpiCards = [
     {
@@ -81,7 +104,11 @@ export default function AdminDashboard() {
           Dashboard Overview
         </h1>
         <p className="text-muted-foreground mt-1">
-          Welcome back. Here&apos;s what&apos;s happening across your {stats.activeBranches} active branches.
+          {isManager ? (
+            `Welcome back. Here's what's happening at your assigned branch: ${branchName}.`
+          ) : (
+            `Welcome back. Here's what's happening across your ${stats.activeBranches} active branches.`
+          )}
         </p>
       </div>
 
@@ -122,9 +149,9 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent className="pt-4">
             <div className="flex items-end gap-3 h-52">
-              {revenueData.map((d, i) => {
-                const maxRevenue = Math.max(...revenueData.map(r => r.revenue))
-                const heightPercent = (d.revenue / maxRevenue) * 100
+              {filteredRevenueData.map((d, i) => {
+                const maxRevenue = Math.max(...filteredRevenueData.map(r => r.revenue))
+                const heightPercent = maxRevenue > 0 ? (d.revenue / maxRevenue) * 100 : 0
                 return (
                   <div key={d.month} className="flex-1 flex flex-col items-center gap-2 group">
                     <span className="text-xs font-bold text-foreground opacity-0 group-hover:opacity-100 transition-opacity">
@@ -150,7 +177,7 @@ export default function AdminDashboard() {
             <CardTitle className="font-serif text-lg">Branch Occupancy</CardTitle>
           </CardHeader>
           <CardContent className="pt-4 space-y-4">
-            {branches.filter(b => b.status === 'active').map((branch) => {
+            {filteredBranches.filter(b => b.status === 'active').map((branch) => {
               const occupancyPercent = branch.totalRooms ? Math.round((branch.occupiedRooms / branch.totalRooms) * 100) : 0
               return (
                 <div key={branch.id} className="space-y-2">
@@ -185,7 +212,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent className="pt-2">
             <div className="space-y-1">
-              {recentActivity.slice(0, 10).map((activity) => {
+              {filteredActivity.slice(0, 10).map((activity) => {
                 const Icon = activityIcons[activity.type] || CalendarCheck
                 const colorClass = activityColors[activity.type] || 'bg-gray-100 text-gray-700'
                 return (
@@ -203,6 +230,9 @@ export default function AdminDashboard() {
                   </div>
                 )
               })}
+              {filteredActivity.length === 0 && (
+                <div className="p-4 text-center text-sm text-muted-foreground">No recent activity found.</div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -213,7 +243,7 @@ export default function AdminDashboard() {
             <CardTitle className="font-serif text-lg">Branch Revenue</CardTitle>
           </CardHeader>
           <CardContent className="pt-4 space-y-3">
-            {branches.filter(b => b.status === 'active').map((branch) => (
+            {filteredBranches.filter(b => b.status === 'active').map((branch) => (
               <div
                 key={branch.id}
                 className="flex items-center justify-between p-3 rounded-xl border border-border/50 hover:border-primary/20 transition-colors group"

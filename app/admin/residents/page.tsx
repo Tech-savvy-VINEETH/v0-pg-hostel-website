@@ -40,7 +40,17 @@ export default function ResidentsPage() {
   const [rentFilter, setRentFilter] = useState('all')
   const [isAddOpen, setIsAddOpen] = useState(false)
 
-  const { residents, branches, addResident } = useAdminStore()
+  const { residents, branches, addResident, currentUser } = useAdminStore()
+
+  const isManager = currentUser?.role === 'branch_manager'
+  const targetBranchId = currentUser?.branchId
+
+  const activeResidents = useMemo(() => {
+    if (isManager) {
+      return residents.filter((r) => r.branchId === targetBranchId)
+    }
+    return residents
+  }, [residents, isManager, targetBranchId])
 
   const [newResident, setNewResident] = useState({
     name: '',
@@ -56,16 +66,16 @@ export default function ResidentsPage() {
   })
 
   const filteredResidents = useMemo(() => {
-    return residents.filter((resident) => {
+    return activeResidents.filter((resident) => {
       const matchesSearch =
         resident.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         resident.phone.includes(searchQuery) ||
         resident.occupation.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesBranch = branchFilter === 'all' || resident.branchId === branchFilter
+      const matchesBranch = isManager || branchFilter === 'all' || resident.branchId === branchFilter
       const matchesRent = rentFilter === 'all' || resident.rentStatus === rentFilter
       return matchesSearch && matchesBranch && matchesRent
     })
-  }, [searchQuery, branchFilter, rentFilter, residents])
+  }, [searchQuery, branchFilter, rentFilter, activeResidents, isManager])
 
   const rentStatusColors: Record<string, string> = {
     paid: 'bg-emerald-100 text-emerald-700 border-emerald-200',
@@ -79,17 +89,21 @@ export default function ResidentsPage() {
     overdue: AlertTriangle,
   }
 
-  const totalRent = residents.reduce((s, r) => s + r.monthlyRent, 0)
-  const paidCount = residents.filter(r => r.rentStatus === 'paid').length
-  const overdueCount = residents.filter(r => r.rentStatus === 'overdue').length
+  const totalRent = activeResidents.reduce((s, r) => s + r.monthlyRent, 0)
+  const paidCount = activeResidents.filter(r => r.rentStatus === 'paid').length
+  const overdueCount = activeResidents.filter(r => r.rentStatus === 'overdue').length
 
   const handleAddResident = (e: React.FormEvent) => {
     e.preventDefault()
-    const selectedBranch = branches.find(b => b.id === newResident.branchId)
+    const finalBranchId = isManager ? targetBranchId : newResident.branchId
+    if (!finalBranchId) return
+
+    const selectedBranch = branches.find(b => b.id === finalBranchId)
     if (!selectedBranch) return
 
     addResident({
       ...newResident,
+      branchId: finalBranchId,
       id: `res-${Date.now()}`,
       branchName: selectedBranch.name.replace('HomeStay PG — ', '')
     })
@@ -112,7 +126,7 @@ export default function ResidentsPage() {
             Resident Directory
           </h1>
           <p className="text-muted-foreground mt-1">
-            Complete directory of all residents across branches
+            {isManager ? 'Complete directory of residents for your assigned branch' : 'Complete directory of all residents across branches'}
           </p>
         </div>
 
@@ -146,25 +160,32 @@ export default function ResidentsPage() {
                     <Input id="email" type="email" required value={newResident.email} onChange={e => setNewResident({...newResident, email: e.target.value})} placeholder="email@..." />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="branch">Branch</Label>
-                    <Select value={newResident.branchId} onValueChange={(v) => setNewResident({...newResident, branchId: v})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Branch" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {branches.filter(b => b.status === 'active').map(b => (
-                          <SelectItem key={b.id} value={b.id}>{b.name.replace('HomeStay PG — ', '')}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                {isManager ? (
                   <div className="space-y-2">
                     <Label htmlFor="room">Room Number</Label>
                     <Input id="room" required value={newResident.roomNumber} onChange={e => setNewResident({...newResident, roomNumber: e.target.value})} placeholder="e.g. 101" />
                   </div>
-                </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="branch">Branch</Label>
+                      <Select value={newResident.branchId} onValueChange={(v) => setNewResident({...newResident, branchId: v})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Branch" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {branches.filter(b => b.status === 'active').map(b => (
+                            <SelectItem key={b.id} value={b.id}>{b.name.replace('HomeStay PG — ', '')}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="room">Room Number</Label>
+                      <Input id="room" required value={newResident.roomNumber} onChange={e => setNewResident({...newResident, roomNumber: e.target.value})} placeholder="e.g. 101" />
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="rent">Monthly Rent</Label>
@@ -177,7 +198,7 @@ export default function ResidentsPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit" disabled={!newResident.branchId}>Save Resident</Button>
+                <Button type="submit" disabled={!isManager && !newResident.branchId}>Save Resident</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -192,7 +213,7 @@ export default function ResidentsPage() {
               <Users className="size-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-xl font-bold">{residents.length}</p>
+              <p className="text-xl font-bold">{activeResidents.length}</p>
               <p className="text-xs text-muted-foreground">Total Residents</p>
             </div>
           </CardContent>
@@ -244,16 +265,18 @@ export default function ResidentsPage() {
           />
         </div>
         <div className="flex flex-wrap gap-2">
-          <select
-            value={branchFilter}
-            onChange={(e) => setBranchFilter(e.target.value)}
-            className="h-11 rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
-          >
-            <option value="all">All Branches</option>
-            {branches.filter(b => b.status === 'active').map(b => (
-              <option key={b.id} value={b.id}>{b.name.replace('HomeStay PG — ', '')}</option>
-            ))}
-          </select>
+          {!isManager && (
+            <select
+              value={branchFilter}
+              onChange={(e) => setBranchFilter(e.target.value)}
+              className="h-11 rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+            >
+              <option value="all">All Branches</option>
+              {branches.filter(b => b.status === 'active').map(b => (
+                <option key={b.id} value={b.id}>{b.name.replace('HomeStay PG — ', '')}</option>
+              ))}
+            </select>
+          )}
           <select
             value={rentFilter}
             onChange={(e) => setRentFilter(e.target.value)}

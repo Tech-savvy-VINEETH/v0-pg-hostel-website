@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { useAdminStore } from '@/lib/store'
 
 export default function AdminLoginPage() {
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const router = useRouter()
@@ -24,11 +25,20 @@ export default function AdminLoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
-    if (password === 'admin123') {
-      login()
+    if (!email) {
+      setError('Please enter your email or username.')
+      return
+    }
+    if (!password) {
+      setError('Please enter your password.')
+      return
+    }
+
+    const res = login(email, password)
+    if (res.success) {
       router.push('/admin')
     } else {
-      setError('Invalid password. Hint: admin123')
+      setError(res.error || 'Invalid credentials. Hint: admin@homestay.com / admin123 or rajesh@homestay.com / password123')
     }
   }
 
@@ -51,11 +61,23 @@ export default function AdminLoginPage() {
           </div>
           <CardTitle className="text-2xl font-serif text-stone-800 tracking-tight">Admin Login</CardTitle>
           <CardDescription className="text-stone-500">
-            Enter the admin password to access the dashboard
+            Enter your credentials to access the dashboard
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email or Username</Label>
+              <Input
+                id="email"
+                type="text"
+                placeholder="e.g., admin@homestay.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="border-stone-200 focus-visible:ring-emerald-600"
+                required
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
@@ -65,8 +87,9 @@ export default function AdminLoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="border-stone-200 focus-visible:ring-emerald-600"
+                required
               />
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {error && <p className="text-xs text-red-500 bg-red-50 p-2.5 rounded-lg border border-red-200 leading-snug">{error}</p>}
             </div>
             <Button type="submit" className="w-full bg-stone-800 hover:bg-stone-900 text-white">
               Login

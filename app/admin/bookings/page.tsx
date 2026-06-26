@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
   CalendarCheck,
-  Eye,
   Clock,
   CheckCircle2,
   XCircle,
@@ -17,12 +16,38 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { BOOKING_REQUESTS, VISIT_REQUESTS } from '@/lib/admin-data'
+import { useAdminStore } from '@/lib/store'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 export default function BookingsPage() {
   const [activeTab, setActiveTab] = useState<'bookings' | 'visits'>('bookings')
   const [searchQuery, setSearchQuery] = useState('')
+
+  const {
+    bookingRequests,
+    visitRequests,
+    currentUser,
+    updateBookingStatus,
+    updateVisitStatus,
+  } = useAdminStore()
+
+  const isManager = currentUser?.role === 'branch_manager'
+  const targetBranchId = currentUser?.branchId
+
+  const activeBookings = useMemo(() => {
+    if (isManager) {
+      return bookingRequests.filter((b) => b.branchId === targetBranchId)
+    }
+    return bookingRequests
+  }, [bookingRequests, isManager, targetBranchId])
+
+  const activeVisits = useMemo(() => {
+    if (isManager) {
+      return visitRequests.filter((v) => v.branchId === targetBranchId)
+    }
+    return visitRequests
+  }, [visitRequests, isManager, targetBranchId])
 
   const statusColors: Record<string, string> = {
     pending: 'bg-amber-100 text-amber-700 border-amber-200',
@@ -38,18 +63,22 @@ export default function BookingsPage() {
     cancelled: XCircle,
   }
 
-  const filteredBookings = BOOKING_REQUESTS.filter((b) =>
-    b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    b.branchPreference.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredBookings = useMemo(() => {
+    return activeBookings.filter((b) =>
+      b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      b.branchPreference.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }, [activeBookings, searchQuery])
 
-  const filteredVisits = VISIT_REQUESTS.filter((v) =>
-    v.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    v.branchPreference.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredVisits = useMemo(() => {
+    return activeVisits.filter((v) =>
+      v.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      v.branchPreference.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }, [activeVisits, searchQuery])
 
-  const pendingBookings = BOOKING_REQUESTS.filter(b => b.status === 'pending').length
-  const pendingVisits = VISIT_REQUESTS.filter(v => v.status === 'pending').length
+  const pendingBookings = activeBookings.filter(b => b.status === 'pending').length
+  const pendingVisits = activeVisits.filter(v => v.status === 'pending').length
 
   return (
     <div className="space-y-8">
@@ -59,7 +88,7 @@ export default function BookingsPage() {
           Bookings & Visit Requests
         </h1>
         <p className="text-muted-foreground mt-1">
-          Manage incoming booking and visit tour requests
+          {isManager ? 'Manage incoming booking and visit tour requests for your branch' : 'Manage incoming booking and visit tour requests across all branches'}
         </p>
       </div>
 
@@ -156,8 +185,28 @@ export default function BookingsPage() {
                         <td className="px-4 py-3.5">
                           {booking.status === 'pending' && (
                             <div className="flex gap-1.5">
-                              <Button size="sm" variant="outline" className="h-7 text-xs rounded-lg px-2.5">Confirm</Button>
-                              <Button size="sm" variant="ghost" className="h-7 text-xs rounded-lg px-2.5 text-red-600 hover:text-red-700 hover:bg-red-50">Reject</Button>
+                              <Button
+                                onClick={() => {
+                                  updateBookingStatus(booking.id, 'confirmed')
+                                  toast.success(`Booking request for ${booking.name} has been confirmed.`)
+                                }}
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs rounded-lg px-2.5"
+                              >
+                                Confirm
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  updateBookingStatus(booking.id, 'cancelled')
+                                  toast.success(`Booking request for ${booking.name} has been rejected.`)
+                                }}
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 text-xs rounded-lg px-2.5 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                Reject
+                              </Button>
                             </div>
                           )}
                         </td>
@@ -218,7 +267,11 @@ export default function BookingsPage() {
                         </td>
                         <td className="px-4 py-3.5 text-muted-foreground">{visit.branchPreference}</td>
                         <td className="px-4 py-3.5">
-                          <p className="text-foreground font-medium">{new Date(visit.preferredDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
+                          <p className="text-foreground font-medium">
+                            {visit.preferredDate === 'TBD' 
+                              ? 'TBD' 
+                              : new Date(visit.preferredDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                          </p>
                           <p className="text-xs text-muted-foreground">{visit.preferredTime}</p>
                         </td>
                         <td className="px-4 py-3.5">
@@ -230,8 +283,28 @@ export default function BookingsPage() {
                         <td className="px-4 py-3.5">
                           {visit.status === 'pending' && (
                             <div className="flex gap-1.5">
-                              <Button size="sm" variant="outline" className="h-7 text-xs rounded-lg px-2.5">Confirm</Button>
-                              <Button size="sm" variant="ghost" className="h-7 text-xs rounded-lg px-2.5 text-red-600 hover:text-red-700 hover:bg-red-50">Reject</Button>
+                              <Button
+                                onClick={() => {
+                                  updateVisitStatus(visit.id, 'confirmed')
+                                  toast.success(`Visit request for ${visit.name} has been confirmed.`)
+                                }}
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs rounded-lg px-2.5"
+                              >
+                                Confirm
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  updateVisitStatus(visit.id, 'cancelled')
+                                  toast.success(`Visit request for ${visit.name} has been rejected.`)
+                                }}
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 text-xs rounded-lg px-2.5 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                Reject
+                              </Button>
                             </div>
                           )}
                         </td>

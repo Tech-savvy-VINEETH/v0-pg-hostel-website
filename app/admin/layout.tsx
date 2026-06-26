@@ -15,7 +15,8 @@ import {
   ChevronRight,
   LogOut,
   Bell,
-  CheckCheck
+  CheckCheck,
+  Shield
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAdminStore } from '@/lib/store'
@@ -30,7 +31,8 @@ import {
 
 const sidebarItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/branches', label: 'Branches', icon: Building2 },
+  { href: '/admin/branches', label: 'Branches', icon: Building2, roles: ['super_admin'] },
+  { href: '/admin/managers', label: 'Branch Managers', icon: Shield, roles: ['super_admin'] },
   { href: '/admin/rooms', label: 'Rooms', icon: BedDouble },
   { href: '/admin/bookings', label: 'Bookings & Visits', icon: CalendarCheck },
   { href: '/admin/residents', label: 'Residents', icon: Users },
@@ -40,15 +42,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { isAuthenticated, logout, recentActivity } = useAdminStore()
+  const { isAuthenticated, logout, recentActivity, currentUser, branches } = useAdminStore()
 
   const isLoginPage = pathname === '/admin/login'
 
   useEffect(() => {
     if (!isAuthenticated && !isLoginPage) {
       router.push('/admin/login')
+    } else if (isAuthenticated && currentUser && currentUser.role === 'branch_manager') {
+      if (pathname.startsWith('/admin/branches') || pathname.startsWith('/admin/managers')) {
+        router.push('/admin')
+        import('sonner').then(({ toast }) => {
+          toast.error('Access Denied', {
+            description: 'You do not have permission to access this page.'
+          })
+        })
+      }
     }
-  }, [isAuthenticated, isLoginPage, router])
+  }, [isAuthenticated, isLoginPage, currentUser, pathname, router])
 
   // If it's the login page, just render the children without the dashboard shell
   if (isLoginPage) {
@@ -63,6 +74,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (href === '/admin') return pathname === '/admin'
     return pathname.startsWith(href)
   }
+
+  const allowedSidebarItems = sidebarItems.filter(
+    (item) => !item.roles || (currentUser && item.roles.includes(currentUser.role))
+  )
+
+  const branchName = currentUser?.role === 'branch_manager'
+    ? branches.find(b => b.id === currentUser.branchId)?.name.replace('HomeStay PG — ', '')
+    : null
 
   return (
     <div className="flex min-h-screen bg-muted/30">
@@ -102,7 +121,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <p className="px-3 mb-3 text-[10px] font-bold uppercase tracking-widest text-white/30">
             Management
           </p>
-          {sidebarItems.map((item) => {
+          {allowedSidebarItems.map((item) => {
             const Icon = item.icon
             const active = isActive(item.href)
             return (
@@ -191,11 +210,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </DropdownMenu>
             <div className="flex items-center gap-3 pl-3 border-l border-border/50">
               <div className="size-9 rounded-full bg-emerald-600/20 flex items-center justify-center text-emerald-600 font-bold text-sm">
-                AD
+                {currentUser?.name ? currentUser.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : 'AD'}
               </div>
               <div className="hidden md:block">
-                <p className="text-sm font-semibold">Admin</p>
-                <p className="text-xs text-muted-foreground">Super Admin</p>
+                <p className="text-sm font-semibold">{currentUser?.name || 'Admin'}</p>
+                <p className="text-xs text-muted-foreground font-medium">
+                  {currentUser?.role === 'super_admin' ? 'Super Admin' : `Manager — ${branchName || 'Branch'}`}
+                </p>
               </div>
             </div>
           </div>
